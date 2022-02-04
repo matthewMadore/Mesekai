@@ -38,7 +38,7 @@ export async function init(canvas, currUser) {
     scene = new THREE.Scene();
     loader = new FBXLoader();
 
-    let avatarName = "ybot";
+    let avatarName = "remy";
     let worldName = "grid";
 
     // TODO: use database fields for initial avatar and world

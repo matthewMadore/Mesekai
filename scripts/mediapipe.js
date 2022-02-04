@@ -1,7 +1,7 @@
 import { Camera } from "@mediapipe/camera_utils";
 import { Holistic } from "@mediapipe/holistic";
 
-import { setPose, setFingers, setMorphs } from "./avatar";
+import { setPose, setFingers, setMorphs, kalidoFace } from "./avatar";
 
 // device constants
 const WIDTH = 1920;
@@ -15,6 +15,7 @@ export function PoseDetector(preload, videoInput) {
     holistic.setOptions({
         modelComplexity: 1,
         smoothLandmarks: true,
+        refineFaceLandmarks: true,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     });
@@ -22,25 +23,29 @@ export function PoseDetector(preload, videoInput) {
     holistic.onResults((results) => {
         preload.hidden = true;
 
-        let poseLandmarks = results.poseLandmarks;
-        let poseWorldLandmarks = results.ea;
-        if (poseWorldLandmarks) {
-            setPose(poseLandmarks, poseWorldLandmarks);
-        }
+        // let poseLandmarks = results.poseLandmarks;
+        // let poseWorldLandmarks = results.ea;
+        // if (poseWorldLandmarks) {
+        //     setPose(poseLandmarks, poseWorldLandmarks);
+        // }
     
-        let leftHandLandmarks = results.leftHandLandmarks;
-        if (leftHandLandmarks) {
-            setFingers(leftHandLandmarks, false);
-        }
+        // let leftHandLandmarks = results.leftHandLandmarks;
+        // if (leftHandLandmarks) {
+        //     setFingers(leftHandLandmarks, false);
+        // }
     
-        let rightHandLandmarks = results.rightHandLandmarks;
-        if (rightHandLandmarks) {
-            setFingers(rightHandLandmarks, true);
-        }
-    
+        // let rightHandLandmarks = results.rightHandLandmarks;
+        // if (rightHandLandmarks) {
+        //     setFingers(rightHandLandmarks, true);
+        // }
+
         let faceLandmarks = results.faceLandmarks;
         if (faceLandmarks) {
-            setMorphs(faceLandmarks);
+            // Mesekai solver
+            //setMorphs(faceLandmarks);
+
+            // Kalidokit solver
+            kalidoFace(faceLandmarks);
         }
     });
 

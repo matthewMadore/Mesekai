@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 
+import { Face, Pose, Hand } from "kalidokit";
+import { rigFace } from './kalidokit';
+
 // device constants
 const WIDTH = 1920;
 const HEIGHT = 1080;
@@ -551,4 +554,16 @@ function setMorphTarget(target, val) {
     // interpolate with previous value to prevent jittering
     let SMOOTHING = 0.25;
     morphTargets[morphDict[target]] = (1 - SMOOTHING) * morphTargets[morphDict[target]] + SMOOTHING * val;
+}
+
+///////////////////////////
+// KALIDOKIT INTEGRATION //
+///////////////////////////
+
+export function kalidoFace(faceLandmarks) {
+    let faceRig = Face.solve(faceLandmarks, {
+        runtime: "mediapipe",
+        imageSize: { height: HEIGHT, width: WIDTH },
+    });
+    rigFace(faceRig, neckBone, morphTargets, morphDict);
 }
