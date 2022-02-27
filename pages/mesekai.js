@@ -24,7 +24,8 @@ export default function Avatar() {
 
         const [detector, camera] = PoseDetector(
             preload.current,
-            videoInput.current
+            videoInput.current,
+            true // kalidokit
         );
 
         camera.start();

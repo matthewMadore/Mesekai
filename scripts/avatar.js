@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import { Face, Pose, Hand } from "kalidokit";
-import { rigFace } from './kalidokit';
+import { rigFace, rigPose } from './kalidokit';
 
 // device constants
 const WIDTH = 1920;
@@ -45,7 +45,7 @@ const RIGHT = 234;     // right most point
 const TOP = 10;        // top most point                       
 const BOT = 152;       // bot most point
 
-let skeleton, spine, neckBone, morphTargets, morphDict;
+let skeleton, spine, spine1, spine2, neckBone, morphTargets, morphDict;
 let leftShoulderBone, leftElbowBone, leftWristBone, rightShoulderBone, rightElbowBone, rightWristBone;
 let leftHipBone, leftKneeBone, leftAnkleBone, leftFootBone, rightHipBone, rightKneeBone, rightAnkleBone, rightFootBone;
 let leftHandBones, rightHandBones;
@@ -54,6 +54,7 @@ const eyelashNames = ["default", "Eyelashes", "Ch22_Eyelashes"];
 
 export async function Avatar(name, loader) {
     let avatar = await loader.loadAsync(`/avatars/${name}.fbx`);
+    console.log(avatar);
     
     // Skinned Mesh
     let skinnedMesh = avatar.getObjectByName("Body");
@@ -65,6 +66,8 @@ export async function Avatar(name, loader) {
     // Skeleton / Bone
     skeleton = avatar.getObjectByName("mixamorigHips");
     spine = avatar.getObjectByName("mixamorigSpine");
+    spine1 = spine.getObjectByName("mixamorigSpine1");
+    spine2 = spine1.getObjectByName("mixamorigSpine2");
     neckBone = skeleton.getObjectByName("mixamorigHead");
 
     leftShoulderBone = skeleton.getObjectByName("mixamorigRightArm");
@@ -560,10 +563,21 @@ function setMorphTarget(target, val) {
 // KALIDOKIT INTEGRATION //
 ///////////////////////////
 
+export function kalidoPose(poseLandmarks, poseWorldLandmarks) {
+    let poseRig = Pose.solve(poseWorldLandmarks, poseLandmarks, {
+        runtime: "mediapipe",
+        imageSize: { height: HEIGHT, width: WIDTH },
+    });
+
+    const bones = [skeleton, spine, spine1, spine2, rightShoulderBone, rightElbowBone, leftShoulderBone, leftElbowBone, rightHipBone, rightKneeBone, leftHipBone, leftKneeBone];
+    rigPose(poseRig, bones);
+}
+
 export function kalidoFace(faceLandmarks) {
     let faceRig = Face.solve(faceLandmarks, {
         runtime: "mediapipe",
         imageSize: { height: HEIGHT, width: WIDTH },
     });
+
     rigFace(faceRig, neckBone, morphTargets, morphDict);
 }

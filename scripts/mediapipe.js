@@ -1,13 +1,13 @@
 import { Camera } from "@mediapipe/camera_utils";
 import { Holistic } from "@mediapipe/holistic";
 
-import { setPose, setFingers, setMorphs, kalidoFace } from "./avatar";
+import { setPose, setFingers, setMorphs, kalidoFace, kalidoPose } from "./avatar";
 
 // device constants
 const WIDTH = 1920;
 const HEIGHT = 1080;
 
-export function PoseDetector(preload, videoInput) {
+export function PoseDetector(preload, videoInput, kalidokit=false) {
     const holistic = new Holistic({locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
     }});
@@ -23,11 +23,12 @@ export function PoseDetector(preload, videoInput) {
     holistic.onResults((results) => {
         preload.hidden = true;
 
-        // let poseLandmarks = results.poseLandmarks;
-        // let poseWorldLandmarks = results.ea;
-        // if (poseWorldLandmarks) {
-        //     setPose(poseLandmarks, poseWorldLandmarks);
-        // }
+        let poseLandmarks = results.poseLandmarks;
+        let poseWorldLandmarks = results.ea;
+        if (poseLandmarks && poseWorldLandmarks) {
+            if (kalidokit) kalidoPose(poseLandmarks, poseWorldLandmarks);
+            else setPose(poseLandmarks, poseWorldLandmarks);
+        }
     
         // let leftHandLandmarks = results.leftHandLandmarks;
         // if (leftHandLandmarks) {
@@ -41,11 +42,8 @@ export function PoseDetector(preload, videoInput) {
 
         let faceLandmarks = results.faceLandmarks;
         if (faceLandmarks) {
-            // Mesekai solver
-            //setMorphs(faceLandmarks);
-
-            // Kalidokit solver
-            kalidoFace(faceLandmarks);
+            if (kalidokit) kalidoFace(faceLandmarks);
+            else setMorphs(faceLandmarks);
         }
     });
 
