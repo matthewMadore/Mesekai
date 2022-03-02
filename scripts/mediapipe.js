@@ -1,7 +1,7 @@
 import { Camera } from "@mediapipe/camera_utils";
 import { Holistic } from "@mediapipe/holistic";
 
-import { setPose, setFingers, setMorphs, kalidoFace, kalidoPose } from "./avatar";
+import { setPose, setFingers, setMorphs, kalidoFace, kalidoPose, kalidoHand } from "./avatar";
 
 // device constants
 const WIDTH = 1920;
@@ -30,15 +30,17 @@ export function PoseDetector(preload, videoInput, kalidokit=false) {
             else setPose(poseLandmarks, poseWorldLandmarks);
         }
     
-        // let leftHandLandmarks = results.leftHandLandmarks;
-        // if (leftHandLandmarks) {
-        //     setFingers(leftHandLandmarks, false);
-        // }
+        let leftHandLandmarks = results.leftHandLandmarks;
+        if (leftHandLandmarks) {
+            if (kalidokit) kalidoHand(leftHandLandmarks, "Left");
+            else setFingers(leftHandLandmarks, false);
+        }
     
-        // let rightHandLandmarks = results.rightHandLandmarks;
-        // if (rightHandLandmarks) {
-        //     setFingers(rightHandLandmarks, true);
-        // }
+        let rightHandLandmarks = results.rightHandLandmarks;
+        if (rightHandLandmarks) {
+            if (kalidokit) kalidoHand(rightHandLandmarks, "Right");
+            else setFingers(rightHandLandmarks, true);
+        }
 
         let faceLandmarks = results.faceLandmarks;
         if (faceLandmarks) {

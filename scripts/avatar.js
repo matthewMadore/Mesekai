@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import { Face, Pose, Hand } from "kalidokit";
-import { rigFace, rigPose } from './kalidokit';
+import { rigFace, rigPose, rigHand } from './kalidokit';
 
 // device constants
 const WIDTH = 1920;
@@ -206,6 +206,14 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
         rot = rotateBone(userJoints[LEFTWRIST], leftFingersUser, leftFingersAvatar, basis);
         leftWristBone.quaternion.slerp(rot, SMOOTHING);
 
+        // TODO: use object3D world matrix perhaps?
+        // let rot = rotateBone2(userJoints[LEFTSHOULDER], userJoints[LEFTELBOW], leftElbowBone);
+        // leftShoulderBone.quaternion.slerp(rot, SMOOTHING);
+        // rot = rotateBone2(userJoints[LEFTELBOW], userJoints[LEFTWRIST], leftWristBone);
+        // leftElbowBone.quaternion.slerp(rot, SMOOTHING);
+        // rot = rotateBone2(userJoints[LEFTWRIST], userJoints[LEFTINDEX], leftHandBones[INDEX1]);
+        // leftWristBone.quaternion.slerp(rot, SMOOTHING);
+
         // right arm
         xAxis = shoulderX.clone();
         yAxis = shoulderY.clone();
@@ -312,7 +320,7 @@ export function setPose(poseLandmarks, poseWorldLandmarks) {
     }
 }
 
-export function setFingers(handLandmarks, isRight) {
+export function setFingers(handLandmarks, isRight=false) {
     let avatarBones = (isRight) ? rightHandBones : leftHandBones;
 
     // hand landmark positions
@@ -531,6 +539,13 @@ function rotateBone(userJoint, userChild, avatarChild, basis) {
     return new THREE.Quaternion().setFromUnitVectors(avatarLimb, userLimb);
 }
 
+function rotateBone2(userJoint, userChild, avatarChild) {
+    let userLimb = userChild.clone().sub(userJoint).normalize();
+    userLimb = avatarChild.worldToLocal(userLimb);
+    let avatarLimb = avatarChild.position.clone().normalize();
+    return new THREE.Quaternion().setFromUnitVectors(avatarLimb, userLimb);
+}
+
 // applies rotation to basis
 function updateBasis(rotation, xAxis, yAxis, zAxis, basis) {
     xAxis.applyQuaternion(rotation);
@@ -571,6 +586,13 @@ export function kalidoPose(poseLandmarks, poseWorldLandmarks) {
 
     const bones = [skeleton, spine, spine1, spine2, rightShoulderBone, rightElbowBone, leftShoulderBone, leftElbowBone, rightHipBone, rightKneeBone, leftHipBone, leftKneeBone];
     rigPose(poseRig, bones);
+}
+
+export function kalidoHand(handLandmarks, hand="Left") {
+    let handRig = Hand.solve(handLandmarks, hand);
+
+    const bones = (hand == "Left") ? leftHandBones : rightHandBones;
+    rigHand(handRig, hand, bones);
 }
 
 export function kalidoFace(faceLandmarks) {
