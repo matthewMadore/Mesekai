@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import { Button, Row, Col, Spin, Tabs } from "antd";
 import { LoadingOutlined } from '@ant-design/icons';
-
 import styles from '../styles/Mesekai.module.css'
 import { init, animate, updateAvatar, updateWorld } from "../scripts/scene";
 import { PoseDetector } from "../scripts/mediapipe";
+import { getSession } from "next-auth/react";
 
 const { TabPane } = Tabs;
 const antIcon = <LoadingOutlined style={{ fontSize: 36 }} spin />;
@@ -13,6 +13,8 @@ export default function Avatar() {
     const preload = useRef();
     const canvas = useRef();
     const videoInput = useRef();
+
+
 
     useEffect(() => {
         // TODO: get authenticated user
@@ -132,4 +134,26 @@ export default function Avatar() {
             <h1 ref={preload}><span className={styles.loadingtext}> Loading Avatar Tracking <Spin indicator={antIcon}/></span></h1>
         </div>
     );
+} 
+
+export async function getServerSideProps(context) {
+        const session = await getSession(context)
+
+        if(!session) {
+                return { 
+                        redirect: { 
+                                destination: `/api/auth/signin?callbackUrl=` + process.env.REDIRECT_URL,
+                                permanent: false,
+                        }, 
+                }
+        }
+        
+
+        return {
+                props: {
+                        session,
+                        data: session ? 'serverAuthenticated' : 'notServerAuthenticated',
+                },
+        } 
 }
+
